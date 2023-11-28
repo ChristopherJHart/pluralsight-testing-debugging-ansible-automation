@@ -1,0 +1,28 @@
+# This simple playbook installs a number of packages on managed hosts.
+---
+- name: Install packages on managed hosts
+  hosts: servers
+  tasks:
+    - name: Update package cache
+      ansible.builtin.apt:
+        update_cache: yes
+      become: true
+      check_mode: false
+    - name: Install security packages
+      ansible.builtin.apt:
+        name:
+          - clamav
+          - clamav-daemon
+          - clamav-freshclam
+        state: present
+      become: true
+    - name: Install networking utility packages
+      ansible.builtin.apt:
+        name:
+          - wget
+          - curl
+          - telnet
+          - tcpdump
+          - nmap
+        state: present
+      become: true

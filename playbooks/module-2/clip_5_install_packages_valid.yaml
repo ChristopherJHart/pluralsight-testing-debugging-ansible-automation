@@ -1,0 +1,23 @@
+# This simple playbook installs a large number of packages on managed hosts.
+---
+- name: Install packages on managed hosts
+  hosts: servers
+  tasks:
+    - name: Install packages
+      ansible.builtin.package:
+        name:
+          - nginx
+          - postgresql
+          - python3
+          - python3-pip
+          - clamav
+          - wget
+          - curl
+          - git
+          - vim
+          - nano
+          - telnet
+          - tcpdump
+          - nmap
+        state: present
+      become: true

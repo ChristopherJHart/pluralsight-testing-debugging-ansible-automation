@@ -1,0 +1,10 @@
+# This simple playbook updates the apt package manager's cache of package information on managed
+# hosts.
+---
+- name: Update apt package cache
+  hosts: servers
+  tasks:
+    - name: Update apt package cache
+      ansible.builtin.apt:
+        update_cache: yes
+      become: true

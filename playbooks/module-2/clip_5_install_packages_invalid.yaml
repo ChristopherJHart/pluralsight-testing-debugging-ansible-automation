@@ -1,0 +1,25 @@
+# This simple playbook installs a large number of packages on managed hosts. However, the "zenmap"
+# package is not a valid package name on Ubuntu hosts. This playbook will fail when it is executed,
+# as well as when it is run in check mode.
+---
+- name: Install packages on managed hosts
+  hosts: servers
+  tasks:
+    - name: Install packages
+      ansible.builtin.package:
+        name:
+          - nginx
+          - postgresql
+          - python3
+          - python3-pip
+          - clamav
+          - wget
+          - curl
+          - git
+          - vim
+          - nano
+          - telnet
+          - tcpdump
+          - zenmap
+        state: present
+      become: true
