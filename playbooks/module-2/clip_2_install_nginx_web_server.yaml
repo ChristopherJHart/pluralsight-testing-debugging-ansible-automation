@@ -1,0 +1,48 @@
+# This playbook installs nginx on targeted hosts creates a service account for the nginx web server
+# on targeted hosts. It purposefully contains an error in the "mode" argument of the "Create
+# /var/www directory" task - this is for demonstration purposes.
+---
+- name: Install and configure nginx on targeted hosts
+  hosts: servers
+  tasks:
+    - name: Install nginx
+      ansible.builtin.package:
+        name: nginx
+        state: present
+      become: true
+    - name: Create nginx group
+      ansible.builtin.group:
+        name: nginx
+        state: present
+        system: yes
+      become: true
+    - name: Create service account for nginx
+      ansible.builtin.user:
+        name: nginx
+        state: present
+        shell: /sbin/nologin
+        system: yes
+        createhome: no
+        remove: no
+        home: /var/www
+        group: nginx
+        groups: nginx
+        append: yes
+        comment: "Nginx service account"
+      become: true
+    - name: Create /var/www directory
+      ansible.builtin.file:
+        path: /var/www
+        state: directory
+        owner: nginx
+        group: nginx
+        mode: "999"
+      become: true
+    - name: Create /var/www/html directory
+      ansible.builtin.file:
+        path: /var/www/html
+        state: directory
+        owner: nginx
+        group: nginx
+        mode: "0755"
+      become: true

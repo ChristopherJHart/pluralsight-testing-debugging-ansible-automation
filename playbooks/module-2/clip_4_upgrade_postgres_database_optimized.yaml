@@ -1,0 +1,45 @@
+# The purpose of this playbook is to gracefully upgrade a PostgreSQL database that has running
+# services dependent on it. This playbook contains multiple plays that are executed in sequence.
+# The first play stops the services that are dependent on the database. The second play upgrades
+# The PostgreSQL database. The third play starts the services that are dependent on the database.
+#
+# This playbook is optimized such that each play is tagged, instead of tasks being individually
+# tagged.
+---
+- name: Stop dependent services
+  hosts: servers
+  tags: stop
+  tasks:
+    - name: Stop dependent nginx service
+      ansible.builtin.service:
+        name: nginx
+        state: stopped
+      become: true
+- name: Upgrade PostgreSQL database
+  hosts: servers
+  tags: database
+  tasks:
+    - name: Stop PostgreSQL database service.
+      ansible.builtin.service:
+        name: postgresql
+        state: stopped
+      become: true
+    - name: Upgrade PostgreSQL database
+      ansible.builtin.package:
+        name: postgresql
+        state: latest
+      become: true
+    - name: Start PostgreSQL database service.
+      ansible.builtin.service:
+        name: postgresql
+        state: started
+      become: true
+- name: Start dependent services
+  hosts: servers
+  tags: start
+  tasks:
+    - name: Start dependent nginx service
+      ansible.builtin.service:
+        name: nginx
+        state: started
+      become: true
