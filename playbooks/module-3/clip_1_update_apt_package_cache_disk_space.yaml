@@ -1,0 +1,48 @@
+# This playbook shows an example of how the ansible.builtin.debug module can be used to
+# print relevant facts gathered from Ubuntu managed hosts.
+---
+- name: Debug module example
+  hosts: servers
+  tasks:
+    - name: All mounts on managed hosts
+      ansible.builtin.debug:
+        var: ansible_facts.mounts
+    - ansible.builtin.pause:
+        prompt: "Press ENTER to continue"
+    - name: Mounts on managed hosts with mount point /
+      ansible.builtin.debug:
+        var: ansible_facts.mounts | selectattr('mount', 'equalto', '/')
+    - ansible.builtin.pause:
+        prompt: "Press ENTER to continue"
+    - name: Available size on managed hosts with mount point /
+      ansible.builtin.debug:
+        var: >-
+          ansible_facts.mounts |
+          selectattr('mount', 'equalto', '/') |
+          map(attribute='size_available')
+    - ansible.builtin.pause:
+        prompt: "Press ENTER to continue"
+    - name: Set fact with available size on managed hosts with mount point /
+      ansible.builtin.set_fact:
+        available_size_root_mount: >-
+          {{ ansible_facts.mounts |
+          selectattr('mount', 'equalto', '/') |
+          map(attribute='size_available') |
+          first }}
+    - ansible.builtin.debug:
+        var: available_size_root_mount
+    - ansible.builtin.pause:
+        prompt: "Press ENTER to continue"
+    - name: Available size on managed hosts with mount point / in human readable format
+      ansible.builtin.debug:
+        msg: >-
+          Managed host {{ inventory_hostname }} has
+          {{ available_size_root_mount | int | human_readable }} of space available on the
+          root mount.
+    - ansible.builtin.pause:
+        prompt: "Press ENTER to continue"
+    - name: Update apt package cache if available disk space is above 5 gigabytes
+      ansible.builtin.apt:
+        update_cache: yes
+      become: true
+      when: available_size_root_mount | int > 5000000000

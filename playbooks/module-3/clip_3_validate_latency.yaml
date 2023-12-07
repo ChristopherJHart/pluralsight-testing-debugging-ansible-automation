@@ -1,0 +1,30 @@
+# This playbook sends ICMP Echo Requests (pings) to a target and validates that the average latency
+# is below a certain threshold.
+---
+- name: Validate latency from hosts to targets
+  hosts: servers
+  tasks:
+    - name: Ping targets from host
+      ansible.builtin.command:
+        cmd: "ping -c 5 8.8.8.8"
+      register: ping_result
+    - name: Set fact with latency statistics
+      ansible.builtin.set_fact:
+        parsed_ping_results: >-
+          {{ ping_result.stdout |
+          regex_findall('rtt min.avg.max.mdev = (\S+) ms', '\\1') |
+          first |
+          split('/') }}
+    - name: Set fact with average latency
+      ansible.builtin.set_fact:
+        average_latency: "{{ parsed_ping_results[1] }}"
+    - ansible.builtin.debug:
+        msg: >-
+          Managed host {{ inventory_hostname }} has an average latency of
+          {{ average_latency }} milliseconds.
+    - ansible.builtin.fail:
+        msg: >-
+          Managed host {{ inventory_hostname }} has an average latency of
+          {{ average_latency }} milliseconds. This is above the threshold of 10
+          milliseconds.
+      when: average_latency | int > 10

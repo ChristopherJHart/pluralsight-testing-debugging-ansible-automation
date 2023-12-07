@@ -1,0 +1,29 @@
+# This playbook shows an example of how the ansible.builtin.assert module can be used
+# to ensure that the available disk space on managed hosts is above a certain threshold
+# before updating the apt package cache.
+---
+- name: Debug module example
+  hosts: servers
+  tasks:
+    - name: Set fact with available size on managed hosts with mount point /
+      ansible.builtin.set_fact:
+        available_size_root_mount: >-
+          {{ ansible_facts.mounts |
+          selectattr('mount', 'equalto', '/') |
+          map(attribute='size_available') |
+          first }}
+    - ansible.builtin.assert:
+        that:
+          - available_size_root_mount | int > 5000000000
+        fail_msg: >-
+          Managed host {{ inventory_hostname }} has
+          {{ available_size_root_mount | int | human_readable }} of space available on
+          the root mount. This is below the threshold of 5 gigabytes.
+        success_msg: >-
+          Managed host {{ inventory_hostname }} has
+          {{ available_size_root_mount | int | human_readable }} of space available on
+          the root mount. This is above the threshold of 5 gigabytes.
+    - name: Update apt package cache if available disk space is above 5 gigabytes
+      ansible.builtin.apt:
+        update_cache: yes
+      become: true

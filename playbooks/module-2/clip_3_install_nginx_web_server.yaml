@@ -1,5 +1,5 @@
-# This playbook installs nginx on targeted hosts creates a service account for the nginx web server
-# on targeted hosts.
+# This playbook installs nginx on targeted hosts and creates a service account for the nginx web
+# server on targeted hosts.
 ---
 - name: Install and configure nginx on targeted hosts
   hosts: servers

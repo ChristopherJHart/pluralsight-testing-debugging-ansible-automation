@@ -1,0 +1,16 @@
+# This playbook installs nginx on targeted hosts. The playbook waits for the nginx web server to
+# listen on TCP port 80 before continuing.
+---
+- name: Install and configure nginx on targeted hosts
+  hosts: servers
+  tasks:
+    - name: Install nginx
+      ansible.builtin.package:
+        name: nginx
+        state: present
+      become: true
+    - name: Wait for TCP port 80 to be open
+      ansible.builtin.wait_for:
+        timeout: 10
+        port: 443
+        state: started
