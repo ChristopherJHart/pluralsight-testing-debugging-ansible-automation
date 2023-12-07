@@ -12,5 +12,5 @@
     - name: Wait for TCP port 80 to be open
       ansible.builtin.wait_for:
         timeout: 10
-        port: 443
+        port: 80
         state: started
